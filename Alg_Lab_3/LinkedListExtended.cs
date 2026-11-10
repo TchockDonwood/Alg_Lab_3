@@ -12,17 +12,17 @@ public class LinkedListExtended<T> : LinkedList<T>
         Node<T>? current = head;
         Node<T>? nextTemp = null;
 
-        tail = head; // Старый первый элемент станет последним
+        tail = head;
 
         while (current != null)
         {
-            nextTemp = current.Next; // Запоминаем следующий
-            current.Next = prev; // Разворачиваем ссылку
-            prev = current; // Двигаем prev
-            current = nextTemp; // Двигаем current
+            nextTemp = current.Next;
+            current.Next = prev;
+            prev = current;
+            current = nextTemp;
         }
 
-        head = prev; // Новый первый элемент
+        head = prev;
     }
 
     // 2.1. Перенос последнего элемента в начало
@@ -32,7 +32,6 @@ public class LinkedListExtended<T> : LinkedList<T>
 
         Node<T>? current = head;
 
-        // Ищем предпоследний элемент, так как у нас нет ссылки Prev
         while (current.Next != tail)
         {
             current = current.Next;
@@ -40,10 +39,10 @@ public class LinkedListExtended<T> : LinkedList<T>
 
         Node<T>? oldTail = tail;
 
-        current.Next = null; // Отвязываем последний
-        tail = current; // Новый хвост - предпоследний
-        oldTail.Next = head; // Старый хвост указывает на старую голову
-        head = oldTail; // Старый хвост становится новой головой
+        current.Next = null;
+        tail = current;
+        oldTail.Next = head;
+        head = oldTail;
     }
 
     // 2.2. Перенос первого элемента в конец
@@ -53,11 +52,11 @@ public class LinkedListExtended<T> : LinkedList<T>
 
         Node<T>? oldHead = head;
 
-        head = oldHead.Next; // Сдвигаем голову на второй элемент
-        oldHead.Next = null; // Отвязываем старый первый
+        head = oldHead.Next;
+        oldHead.Next = null;
 
-        tail.Next = oldHead; // Привязываем его после хвоста
-        tail = oldHead; // Обновляем хвост
+        tail.Next = oldHead;
+        tail = oldHead;
     }
 
     // 3. Определить количество различных элементов (для целых чисел)
@@ -65,8 +64,6 @@ public class LinkedListExtended<T> : LinkedList<T>
     {
         if (head == null) return 0;
 
-        // HashSet сам отбрасывает дубликаты. 
-        // Мы просто бежим по списку и кидаем туда значения.
         HashSet<T> unique = new HashSet<T>();
         Node<T>? current = head;
 
@@ -84,7 +81,6 @@ public class LinkedListExtended<T> : LinkedList<T>
     {
         if (head == null) return;
 
-        // 1. Считаем, сколько раз встречается каждый элемент
         var counts = new Dictionary<T, int>();
         var current = head;
 
@@ -97,24 +93,23 @@ public class LinkedListExtended<T> : LinkedList<T>
             current = current.Next;
         }
 
-        // 2. Проходим второй раз и удаляем те, у которых Count > 1
         Node<T>? prev = null;
         current = head;
 
         while (current != null)
         {
-            if (counts[current.Value] > 1) // Если дубликат
+            if (counts[current.Value] > 1)
             {
                 if (prev == null)
                 {
-                    head = current.Next; // Удаляем первый элемент
+                    head = current.Next;
                 }
                 else
                 {
-                    prev.Next = current.Next; // "Перепрыгиваем" через элемент
+                    prev.Next = current.Next;
                 }
 
-                if (current == tail) // Если удалили последний
+                if (current == tail)
                 {
                     tail = prev;
                 }
@@ -123,13 +118,76 @@ public class LinkedListExtended<T> : LinkedList<T>
             }
             else
             {
-                // ВАЖНО: prev сдвигается только если мы НЕ удалили узел
                 prev = current;
             }
 
             current = current.Next;
         }
     }
+
+    // 5. Вставка списка в себя после первого вхождения x
+    public bool InsertListAfterFirstOccurrence(LinkedList<T> list, T target)
+    {
+        if (list is null || list.head is null || head is null) return false;
+
+        var cmp = EqualityComparer<T>.Default;
+
+        var current = head;
+        while (current != null && !cmp.Equals(current.Value, target))
+            current = current.Next;
+
+        if (current is null) return false;
+
+        var copy = list.Clone();
+
+        var temp = current.Next;
+        current.Next = copy.head;
+        copy.tail!.Next = temp;
+
+        if (temp is null)
+            tail = copy.tail;
+
+        Count += copy.Count;
+        return true;
+    }
+
+    // 6. Вставка элемента в упорядоченный список
+    public void InsertInSortedList(T item)
+    {
+        var node = new Node<T>(item);
+        var cmp = Comparer<T>.Default;
+
+        if (head == null)
+        {
+            head = node;
+            tail = node;
+            Count = 1;
+            return;
+        }
+
+        if (cmp.Compare(item, head.Value) <= 0)
+        {
+            node.Next = head;
+            head = node;
+            Count++;
+            return;
+        }
+
+        var current = head;
+        while (current.Next != null && cmp.Compare(current.Next.Value, item) < 0)
+            current = current.Next;
+
+        node.Next = current.Next;
+        current.Next = node;
+
+        if (node.Next == null)
+            tail = node;
+
+        Count++;
+    }
+
+    // 7. Удаление всех вхождений элемента E
+    // LinkedList<T>.RemoveAll();
 
     // 8. Вставка элемента F перед первым вхождением E
     public bool InsertBeforeFirstOccurrence(T target, T item)
