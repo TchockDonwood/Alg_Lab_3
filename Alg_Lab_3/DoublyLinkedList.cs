@@ -4,9 +4,9 @@ namespace Alg_Lab_3;
 
 public class DoublyLinkedList<T> : IEnumerable<T>
 {
-    public Node<T>? head { get; protected set; }
-    public Node<T>? tail { get; protected set; }
-    public int Count { get; protected set; }
+    public Node<T>? head { get; internal set; }
+    public Node<T>? tail { get; internal set; }
+    public int Count { get; internal set; }
 
     public DoublyLinkedList() { }
 
